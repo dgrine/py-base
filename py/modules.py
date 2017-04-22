@@ -71,7 +71,7 @@ def get_caller_module(frame = 1):
                                            # (caller[0] is the frame)
     return module
 
-def this_module_path(frame = 1):http://deredactie.be/cm/vrtnieuws/economie/1.2957541
+def this_module_path(frame = 1):
     """
     Finds out the path of this module, independently of where it is being run
     from.
