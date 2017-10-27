@@ -41,12 +41,20 @@ class Scenario(object):
         # self._marked_months = []
 
     @property
-    def current_debt(self):
-        return self._installments[-1].debt
-
-    @property
     def current_total_interest(self):
         return self._installments[-1].total_interest
+
+    @property
+    def current_total_capital(self):
+        return self._installments[-1].total_capital
+
+    @property
+    def current_total_paid(self):
+        return self._installments[-1].total_paid
+
+    @property
+    def current_debt(self):
+        return self._installments[-1].debt
 
     @property
     def installments(self):
@@ -75,7 +83,9 @@ class Scenario(object):
 
     def payoff(self, amount):
         self._installments[-1] = self._installments[-1]._replace(debt = self.current_debt - amount)
-        self.loan = Loan(self.current_debt, self.loan.annual_interest_rate, self.loan.nr_months - self.current_month)
+        self._installments[-1] = self._installments[-1]._replace(total_capital = self.current_total_capital + amount)
+        self._installments[-1] = self._installments[-1]._replace(total_paid = self.current_total_paid + amount)
+        self.loan = Loan(self.current_debt, self.loan.annual_interest_rate, self.loan.nr_months - self._idx)
         self._reset_idx()
         # self._mark_month()
 
