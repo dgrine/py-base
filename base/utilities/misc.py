@@ -76,7 +76,7 @@ def parse_timestamp(ts_string):
 def parse_bool(bool_string):
     value_lowercase = bool_string.lower()
     if 'true' == value_lowercase:
-        return Truehttp://deredactie.be/cm/vrtnieuws/economie/1.2957541
+        return True
     return False
 
 _read_version_from_file_regex = re.compile(r'[a-zA-Z-_]+=([0-9]+)')
