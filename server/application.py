@@ -28,7 +28,7 @@
 from base.application.log import get_logger
 from base.application.application import Application
 from base.application.settings import Settings, to_bool, to_int
-from base.utilities import Texttable
+from base.utilities.texttable import Texttable
 from base.server.mixins.backends import FlaskMixin
 from base.py.modules import get_caller_module
 

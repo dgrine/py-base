@@ -27,7 +27,7 @@
 ################################################################################
 from base.application.log import get_logger
 from base.application.mixin import ApplicationMixin
-from flask.ext.triangle import Triangle
+from flask_triangle import Triangle
 
 log = get_logger()
 

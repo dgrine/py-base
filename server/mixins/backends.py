@@ -29,7 +29,7 @@ from base.application.log import get_logger
 from base.application.mixin import ApplicationMixin
 from base.application.mixins import ArgumentsMixin, arg
 from base.application.settings import to_bool, to_int
-from base.utilities import generate_key
+from base.utilities.misc import generate_key
 import flask
 import werkzeug
 import os

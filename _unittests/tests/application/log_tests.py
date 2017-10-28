@@ -1,5 +1,5 @@
 ################################################################################
-# base._unittests.tests.testlog
+# base._unittests.tests.application.log_tests
 #
 # Copyright 2017. Djamel Grine.
 #

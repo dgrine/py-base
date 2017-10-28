@@ -1,5 +1,5 @@
 ################################################################################
-# base._unittests.tests.testsettings
+# base._unittests.tests.application.settings_tests
 #
 # Copyright 2017. Djamel Grine.
 #

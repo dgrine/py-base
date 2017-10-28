@@ -32,7 +32,6 @@ import collections
 Installment = collections.namedtuple('Installment', 'idx interest capital payment total_interest total_capital total_paid debt')
 
 class Loan(object):
-
     def __init__(self, principal, annual_interest_rate, term_in_months):
         super(Loan, self).__init__()
         self.principal = principal
