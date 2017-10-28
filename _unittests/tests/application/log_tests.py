@@ -31,17 +31,11 @@ import os
 
 class Test_Logging(TestCase):
     def setUp(self):
-        for file in [ \
-            os.path.join(self.data_path, filename) \
-            for filename in os.listdir(self.data_path) \
-            if filename.endswith('.log') \
-            ]:
+        for file in [os.path.join(self.data_path, filename) for filename in os.listdir(self.data_path) if filename.endswith('.log')]:
             os.remove(file)
 
     def test_console_logger_all_levels(self):
-        logger_description = {
-            'handler_type': 'StreamHandler',
-        }
+        logger_description = {'handler_type': 'StreamHandler'}
         with LogCapture() as captured_log:
             initialize_logging(logger_description)
             log = get_logger()
@@ -55,16 +49,14 @@ class Test_Logging(TestCase):
                 ('NOISE',    'Noise message'),
                 ('DUMP',     'Dump mesage'),
                 ]
-            for level, line in lines:
-                getattr(log, level.lower())(line)
+            for level, line in lines: getattr(log, level.lower())(line)
 
         ref = [ ('__root__',) + item for item in lines ]
         captured_log.check(*ref)
 
     def test_file_logger_all_levels(self):
         logfile = os.path.join(self.data_path, 'test.log')
-        logger_description = \
-        {
+        logger_description = {
             'handler_type': 'FileHandler',
             'handler_kwargs':
             {
@@ -84,12 +76,11 @@ class Test_Logging(TestCase):
             ('NOISE',    'Noise message'),
             ('DUMP',     'Dump mesage'),
             ]
-        for level, line in lines:
-            getattr(log, level.lower())(line)
+        for level, line in lines: getattr(log, level.lower())(line)
 
         with open(logfile, 'r') as f:
             actual_lines = f.readlines()
-        ref_lines = [ "+%s: %s\n" % item for item in lines ]
+        ref_lines = ["+%s: %s\n" % item for item in lines]
 
         self.assertEqual(ref_lines, actual_lines)
 
@@ -98,23 +89,17 @@ class Test_Logging(TestCase):
         with LogCapture() as captured_log_a:
             initialize_logging(name = 'logger_a')
             log = get_logger(name = 'logger_a')
-            lines = [
-                ('INFO',     'Information message for logger_a'),
-                ]
-            for level, line in lines:
-                getattr(log, level.lower())(line)
-            ref_log_a = [ (log.name,) + item for item in lines ]
+            lines = [('INFO', 'Information message for logger_a')]
+            for level, line in lines: getattr(log, level.lower())(line)
+            ref_log_a = [(log.name,) + item for item in lines]
 
         ref_log_b = None
         with LogCapture() as captured_log_b:
             initialize_logging(name = 'logger_b')
             log = get_logger(name = 'logger_b')
-            lines = [
-                ('INFO',     'Information message for logger_b'),
-                ]
-            for level, line in lines:
-                getattr(log, level.lower())(line)
-            ref_log_b = [ (log.name,) + item for item in lines ]
+            lines = [('INFO', 'Information message for logger_b')]
+            for level, line in lines: getattr(log, level.lower())(line)
+            ref_log_b = [(log.name,) + item for item in lines]
 
         captured_log_a.check(*ref_log_a)
         captured_log_b.check(*ref_log_b)

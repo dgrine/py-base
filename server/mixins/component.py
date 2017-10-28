@@ -33,9 +33,9 @@ from base.server.compmgt import ComponentManager
 
 log = get_logger()
 
-class ConfigurationError( Exception ): pass
+class ConfigurationError(Exception): pass
 
-class ComponentMixin( ApplicationMixin ):
+class ComponentMixin(ApplicationMixin):
     """
     Server application mixin that adds componentization.
     """
@@ -44,52 +44,37 @@ class ComponentMixin( ApplicationMixin ):
         '--include',
         nargs = '+',
         help = 'components to include'
-        )
+       )
     excludes = arg(
         '--exclude',
         nargs = '+',
         help = 'components to exclude'
-        )
+       )
 
-    def __init__( self ):
-        super( ComponentMixin, self ).__init__()
-
-        # Configuration
+    def __init__(self):
+        super(ComponentMixin, self).__init__()
         self._configure_component_mixin()
 
-    def _configure_component_mixin( self ):
-        self._component_manager = ComponentManager( self.settings.components.path )
+    def _configure_component_mixin(self):
+        self._component_manager = ComponentManager(self.settings.components.path)
 
         if self.includes:
-            self.settings.components.includes = ':'.join( self.includes )
+            self.settings.components.includes = ':'.join(self.includes)
         if self.excludes:
-            self.settings.components.excludes = ':'.join( self.excludes )
+            self.settings.components.excludes = ':'.join(self.excludes)
             
         # Sanity checks on the settings
-        log.debug( "Checking for inconsistencies in the component settings..." )
-        log.noise( "-> Checking component selection..." )
-        if \
-            'includes' in self.settings.components \
-                and \
-            'excludes' in self.settings.components:
-            _msg = "Invalid setting: 'includes' and 'excludes' options are mutually "
-            "exclusive settings. Pick one."
-            raise ConfigurationError( _msg )
+        log.debug("Checking for inconsistencies in the component settings...")
+        log.noise("-> Checking component selection...")
+        if 'includes' in self.settings.components and 'excludes' in self.settings.components:
+            raise ConfigurationError("Invalid setting: 'includes' and 'excludes' options are mutually exclusive settings. Pick one.")
 
     @ApplicationMixin.post_init
-    def load_components( self ):
-        log.debug( "Preparing to load server components..." )
+    def load_components(self):
+        log.debug("Preparing to load server components...")
 
-        includes = \
-            self.settings( convert = to_list ).components.includes \
-            if 'includes' in self.settings.components \
-            else \
-            None
-        excludes = \
-            self.settings( convert = to_list ).components.excludes \
-            if 'excludes' in self.settings.components \
-            else \
-            None
+        includes = self.settings(convert = to_list).components.includes if 'includes' in self.settings.components else None
+        excludes = self.settings(convert = to_list).components.excludes if 'excludes' in self.settings.components else None
 
         # Load the server components
-        self._component_manager.load( self, includes, excludes )
+        self._component_manager.load(self, includes, excludes)

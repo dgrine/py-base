@@ -31,20 +31,19 @@ import os
 
 log = get_logger()
 
-class LoggingMixin( ApplicationMixin ):
+class LoggingMixin(ApplicationMixin):
     """
     Application mixin that adds file logging.
     """
 
-    def __init__( self ):
+    def __init__(self):
         """
         Initializes the mixin.
         """
-        super( LoggingMixin, self ).__init__()
-
+        super(LoggingMixin, self).__init__()
         self._configure_logging()
 
-    def _get_logger_descriptions( self, log_level, log_file_all, log_file_err ):
+    def _get_logger_descriptions(self, log_level, log_file_all, log_file_err):
         return [
             {
                 'handler_type': 'FileHandler',
@@ -64,7 +63,7 @@ class LoggingMixin( ApplicationMixin ):
             }
         ]
 
-    def _configure_logging( self ):
+    def _configure_logging(self):
         """
         Configures the file logging by reading the corresponding logging section
         in the settings. Logging will be done to two files:
@@ -73,22 +72,18 @@ class LoggingMixin( ApplicationMixin ):
         """
         # Read configuration
         if not 'logging' in self.settings:
-            raise RuntimeError( "No 'logging' configuration" )
+            raise RuntimeError("No 'logging' configuration")
         if not 'path' in self.settings.logging:
-            raise RuntimeError( "No 'path' setting in 'logging' configuration" )
+            raise RuntimeError("No 'path' setting in 'logging' configuration")
         log_path = self.settings.logging.path
-        log_file_all = os.path.join( log_path, self.settings( default = 'all.log' ).logging.filename_all )
-        log_file_err = os.path.join( log_path, self.settings( default = 'err.log' ).logging.filename_error )
-        log_level = self.settings( default = 'DUMP' ).logging.level
+        log_file_all = os.path.join(log_path, self.settings(default = 'all.log').logging.filename_all)
+        log_file_err = os.path.join(log_path, self.settings(default = 'err.log').logging.filename_error)
+        log_level = self.settings(default = 'DUMP').logging.level
         
         # List of logger descriptions
-        logger_descriptions = self._get_logger_descriptions(
-            log_level,
-            log_file_all,
-            log_file_err
-            )
+        logger_descriptions = self._get_logger_descriptions(log_level, log_file_all, log_file_err)
     
         # Initialize the logging
-        log.debug( "Setting up file logging to '%s'...", log_path )
-        initialize_logging( logger_descriptions, name = '__root__' )
-        log.debug( "File logging active." )
+        log.debug("Setting up file logging to '%s'...", log_path)
+        initialize_logging(logger_descriptions, name = '__root__')
+        log.debug("File logging active.")

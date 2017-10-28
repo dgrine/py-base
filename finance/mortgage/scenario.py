@@ -120,7 +120,7 @@ class Scenario(object):
         p1 = ax.bar(ind, _interest, width, color=(0.2588,0.4433,1.0), label = "Interest")
         p2 = ax.bar(ind, _capital, width, color=(1.0,0.5,0.62), bottom = _interest, label = "Capital")
         ax.legend()
-        ax.grid(True)
+        # ax.grid(True)
         ax.set_ylabel('EUR')
         ax.set_xlabel('Year')
 

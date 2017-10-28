@@ -65,8 +65,7 @@ def get_filename_extension(filename):
 
 def current_timestamp(format_string = None):
     if None != format_string:
-        assert type(format_string) in (str, unicode), \
-            "Expected string type"
+        assert type(format_string) in (str, unicode), "Expected string type"
         return datetime.datetime.utcnow().strftime(format_string)
     return datetime.datetime.utcnow()
 
@@ -98,12 +97,7 @@ def read_version_from_file(file):
     assert os.path.isfile(file), "'%s' is not a file" % file
 
     with open(file, 'r') as f:
-        return ".".join(
-            [
-                _read_version_from_file_regex.match(line).groups()[0]
-                for line in f.readlines()
-            ]
-            )
+        return ".".join([_read_version_from_file_regex.match(line).groups()[0] for line in f.readlines()])
 
 def remove_duplicates(seq):
     """
@@ -139,6 +133,5 @@ def round_number(number, nof_decimals = 2):
     number_type = type(number)
     assert number_type in (int, long, float), "Expected numeric type"
     assert int == type(nof_decimals), "Expected int type"
-
     return float(str(round(number, nof_decimals)))
 

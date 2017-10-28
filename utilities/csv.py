@@ -36,7 +36,6 @@ class UTF8Recoder(object):
     """
     def __init__(self, f, encoding):
         super(UTF8Recoder, self).__init__()
-
         self.reader = codecs.getreader(encoding)(f)
 
     def __iter__(self):
@@ -48,7 +47,6 @@ class UTF8Recoder(object):
 class UnicodeCSVReader(object):
     def __init__(self, f, dialect = unicodecsv.excel, encoding = 'utf-8-sig', **kwds):
         super(UnicodeCSVReader, self).__init__()
-
         f = UTF8Recoder(f, encoding)
         self.reader = unicodecsv.reader(f, dialect = dialect, **kwds)
 
@@ -57,7 +55,7 @@ class UnicodeCSVReader(object):
         This function reads and returns the next line as a Unicode string.
         """
         row = self.reader.next()
-        return [ s if unicode == type(s) else unicode(s, 'utf-8') for s in row ]
+        return [s if unicode == type(s) else unicode(s, 'utf-8') for s in row]
 
     def __iter__(self):
         return self
@@ -74,7 +72,7 @@ class UnicodeCSVWriter(object):
         """
         This function takes a Unicode string and encodes it to the output.
         """
-        encoded_row = [ s.encode('utf-8') if type(s) == str else s for s in row ]
+        encoded_row = [s.encode('utf-8') if type(s) == str else s for s in row]
         self.writer.writerow(encoded_row)
         data = self.queue.getvalue()
         data = data.decode('utf-8')

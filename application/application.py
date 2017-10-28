@@ -67,14 +67,9 @@ class Application(ArgumentsMixin(prog = 'app')):
             self.settings = Settings()
 
         elif type(settings) in (str, unicode, list):
-            self.settings = Settings(
-                config_file = settings,
-                defaults = settings_defaults
-               )
+            self.settings = Settings(config_file = settings, defaults = settings_defaults)
         elif Settings == type(settings):
-            self.settings = settings if not settings is None else Settings(
-            defaults = settings_defaults
-           )
+            self.settings = settings if not settings is None else Settings(defaults = settings_defaults)
 
         assert hasattr(self, 'settings'), "'settings' attribute not set"
         super(Application, self).__init__()
@@ -87,8 +82,8 @@ class Application(ArgumentsMixin(prog = 'app')):
         _log_msg = ""
         for section in self._settings:
             _log_msg += "[%s]\n" % section
-            for option in self._settings[ section ]:
-                value = self._settings[ section ][ option ]
+            for option in self._settings[section]:
+                value = self._settings[section][option]
                 _log_msg += "%s=%s\n" % (option, value)
             _log_msg += "\n"
         log.dump("Application configuration:\n%s", _log_msg)
@@ -102,7 +97,7 @@ class Application(ArgumentsMixin(prog = 'app')):
             if hasattr(getattr(self, fnc_name), '__post_init_function__') \
             and \
             True == getattr(self, fnc_name).__post_init_function__
-            ]
+           ]
         log.noise("Performing application post-initialization...")
         for init_func in post_init_functions:
             log.noise("-> post-init function: '%s'", init_func.__name__)
@@ -113,9 +108,7 @@ class Application(ArgumentsMixin(prog = 'app')):
         """
         This method must be implemented by concrete classes.
         """
-        raise NotImplementedError(
-            "Class '%s' missing 'run' method" % self.__class__.__name__
-           )
+        raise NotImplementedError("Class '%s' missing 'run' method" % self.__class__.__name__)
 
 class PipelineApplication(Application):
     """
@@ -153,24 +146,13 @@ class PipelineApplication(Application):
                     component.run(context)
                 else:
                     log.warning("Skipping component '%s'...", component.name)
-
             except Exception as error:
                 log.exception(error)
                 log.error("Component '%s' failed. Stopping execution.", component.name)
                 exit(1)
-            
             finally:
                 if ts_start:
-                    ts_diff = dateutil.relativedelta.relativedelta(
-                        datetime.datetime.now(),
-                        ts_start
-                       )
-                    log.info(
-                        "Elapsed time: %s hours, %s minutes and %s seconds",
-                        ts_diff.hours,
-                        ts_diff.minutes,
-                        ts_diff.seconds
-                       )
-
+                    ts_diff = dateutil.relativedelta.relativedelta(datetime.datetime.now(), ts_start)
+                    log.info("Elapsed time: %s hours, %s minutes and %s seconds", ts_diff.hours, ts_diff.minutes, ts_diff.seconds)
         log.info("Finished pipeline. Done.")
         

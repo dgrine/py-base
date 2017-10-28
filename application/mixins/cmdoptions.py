@@ -29,7 +29,7 @@ from base.application.mixin import ApplicationMixin
 from base.application.settings import read_from_list
 from base.application.mixins.arguments import arg
 
-class CommandLineOptionsMixin( ApplicationMixin ):
+class CommandLineOptionsMixin(ApplicationMixin):
     """
     Application mixin that allows overwriting any configuration through the command line.
     """
@@ -38,14 +38,14 @@ class CommandLineOptionsMixin( ApplicationMixin ):
         '--option',
         nargs = '+',
         help = 'set an option <section>:<option>=<value>'
-        )
+       )
 
-    def __init__( self ):
+    def __init__(self):
         """
         Initializes the mixin. Settings are parsed using the syntax:
         '--option <section>:<option>=<value>'. Multiple options can be specified.
         """
-        super( CommandLineOptionsMixin, self ).__init__()
+        super(CommandLineOptionsMixin, self).__init__()
 
         if self.options:
-            read_from_list( self.settings, self.options )
+            read_from_list(self.settings, self.options)

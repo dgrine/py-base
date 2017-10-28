@@ -51,7 +51,6 @@ class MissingDependency(Exception):
 class ComponentManager(object):
     def __init__(self, components_path):
         super(ComponentManager, self).__init__()
-
         self._components_path = components_path
 
     def load(self, app, includes, excludes):
@@ -73,13 +72,11 @@ class ComponentManager(object):
             # Select the components
             log.debug("Looking for components in '%s'...", self._components_path)
             components = [
-                    component \
-                    for component in os.listdir(self._components_path) \
-                    if os.path.isdir(
-                        os.path.join(self._components_path, component)
-                       ) \
+                    component
+                    for component in os.listdir(self._components_path)
+                    if os.path.isdir(os.path.join(self._components_path, component))
                     and _component_selector(component)
-                ]
+               ]
 
             # Check if components were selected
             if 0 == len(components):
@@ -88,21 +85,15 @@ class ComponentManager(object):
 
             # Helper functions
             def get_normalized_component_name(component_name):
-                return get_module_name_from_path(
-                        this_module_path_relative('..', '..'),
-                        os.path.join(self._components_path, component_name)
-                       )
+                return get_module_name_from_path(this_module_path_relative('..', '..'), os.path.join(self._components_path, component_name))
 
             def get_friendly_component_name(normalized_component_name):
                 idx = normalized_component_name.rfind('.')
                 assert -1 != idx, "Invalid normalized component name '%s'" % normalized_component_name
-                return normalized_component_name[ idx + 1 : ]
+                return normalized_component_name[idx + 1 :]
 
             # Import the component modules
-            module_names = [
-                get_normalized_component_name(component)
-                for component in components
-                ]
+            module_names = [get_normalized_component_name(component) for component in components]
             log.debug("Importing component modules: %s", ', '.join(module_names))
             modules = { module_name: load_module(module_name) for module_name in module_names }
             log.debug("Finished importing modules")
@@ -110,20 +101,13 @@ class ComponentManager(object):
             # Get the component module dependencies
             log.debug("Analyzing component dependencies...")
             for module in modules.values():
-                dependencies = \
-                    module.__dict__[ 'dependencies' ] \
-                        if hasattr(module, 'dependencies') and list == type(module.__dict__[ 'dependencies' ]) \
-                        else \
-                    []
-                dependencies = [ get_normalized_component_name(dep) for dep in dependencies ]
+                dependencies = module.__dict__['dependencies'] if hasattr(module, 'dependencies') and list == type(module.__dict__['dependencies']) else []
+                dependencies = [get_normalized_component_name(dep) for dep in dependencies]
 
                 # Check that the dependencies exist
                 for dependency in dependencies:
                     if not dependency in module_names:
-                        raise MissingDependency(
-                            get_friendly_component_name(module.__name__),
-                            get_friendly_component_name(dependency)
-                           )
+                        raise MissingDependency(get_friendly_component_name(module.__name__), get_friendly_component_name(dependency))
                 if 0 == len(dependencies):
                     log.debug("Component '%s' has no dependencies", get_friendly_component_name(module.__name__))
                     module.dependencies = []
@@ -131,7 +115,7 @@ class ComponentManager(object):
                     log.debug(
                         "Component '%s' has dependencies on %s",
                         get_friendly_component_name(module.__name__),
-                        ", ".join([ "'%s'" % get_friendly_component_name(dep) for dep in dependencies ])
+                        ", ".join(["'%s'" % get_friendly_component_name(dep) for dep in dependencies])
                        )
 
             # Go over the modules and load them in order
@@ -153,7 +137,7 @@ class ComponentManager(object):
                         break
 
                     log.debug("-> Dependencies:")
-                    if 0 == len(module.dependencies): log.debug("  - [ None ]")
+                    if 0 == len(module.dependencies): log.debug("  - [None]")
                     dependencies_resolved = True
                     for dep in module.dependencies:
                         log.debug("   - %s", get_normalized_component_name(dep))
@@ -170,10 +154,7 @@ class ComponentManager(object):
                         # Initialize the component
                         if not 'init' in module.__dict__:
                             raise RuntimeError("Component '%s' has no init function" % module.__name__)
-                        log.info(
-                            "Initializing component '%s'",
-                            get_friendly_component_name(module.__name__)
-                           )
+                        log.info("Initializing component '%s'", get_friendly_component_name(module.__name__))
                         blueprints = module.init(app)
                         for blueprint in blueprints:
                             log.debug(
@@ -196,8 +177,7 @@ class ComponentManager(object):
                             log.debug("Finalized integration")
 
                             # Build the url prefix
-                            url_prefix = module.url_prefix if hasattr(module, 'url_prefix') \
-                                else '/%s' % (blueprint.name)
+                            url_prefix = module.url_prefix if hasattr(module, 'url_prefix') else '/%s' % (blueprint.name)
 
                             # Register the blueprint
                             log.debug(
@@ -210,12 +190,7 @@ class ComponentManager(object):
                                 blueprint,
                                 url_prefix = url_prefix
                                )
-
-                            # Log the component as loaded
-                            log.info(
-                                "Component '%s' loaded",
-                                get_friendly_component_name(module.__name__)
-                               )
+                            log.info("Component '%s' loaded", get_friendly_component_name(module.__name__))
                         
                 if not loaded_a_module:
                     raise CircularDependency()

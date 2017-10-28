@@ -31,12 +31,12 @@ from flask_triangle import Triangle
 
 log = get_logger()
 
-class AngularMixin( ApplicationMixin ):
+class AngularMixin(ApplicationMixin):
     """
     Server application mixin that facilitates AngularJS and Jinja interaction.
     """
 
     @ApplicationMixin.post_init
-    def apply( self ):
-        log.debug( "Adjusting server for AngularJS and Jinja interaction..." )
-        Triangle( self.server )
+    def apply(self):
+        log.debug("Adjusting server for AngularJS and Jinja interaction...")
+        Triangle(self.server)

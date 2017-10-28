@@ -107,15 +107,10 @@ def get_module_name_from_path(root_path, path):
     Generates the module name from a path, starting from a given
     root path.
     """
-    assert type(root_path) in (str, unicode), \
-        "Expected string type"
-    assert type(path) in (str, unicode), \
-        "Expected string type"
-    assert root_path in path, \
-        "First argument '%s' must be 'in' second argument '%s':" % (root_path, path)
-    module_name = path[len(root_path):]\
-        .replace('.py', '')\
-        .replace(os.sep, '.')
+    assert type(root_path) in (str, unicode), "Expected string type"
+    assert type(path) in (str, unicode), "Expected string type"
+    assert root_path in path, "First argument '%s' must be 'in' second argument '%s':" % (root_path, path)
+    module_name = path[len(root_path):].replace('.py', '').replace(os.sep, '.')
     if module_name.startswith('.'): module_name = module_name[1:]
     return module_name
 
@@ -123,8 +118,7 @@ def load_module(module_name):
     """
     Loads a given module using the Python fully qualified module name.
     """
-    assert type(module_name) in (str, unicode), \
-        "Expected string type"
+    assert type(module_name) in (str, unicode), "Expected string type"
     module = importlib.import_module(module_name)
     return module
 
@@ -134,14 +128,7 @@ def find_classes_in_module(module, filter = lambda name, value: True):
     """
     assert isinstance(module, types.ModuleType), "Expected module type"
 
-    return [
-        value
-        for name, value in inspect.getmembers(module)
-        if 
-            inspect.isclass(value) 
-        and 
-            filter(name, value)
-    ]
+    return [value for name, value in inspect.getmembers(module) if inspect.isclass(value) and filter(name, value)]
 
 def is_path_module(path, executable = False):
     """
@@ -154,9 +141,5 @@ def is_path_module(path, executable = False):
     is_folder = os.path.isdir(resolved_path)
     has_init_py = os.path.isfile(os.path.join(resolved_path, '__init__.py'))
     is_executable = os.path.isfile(os.path.join(resolved_path, '__main__.py'))
-    return \
-        is_folder and has_init_py and is_executable \
-            if executable \
-            else \
-        is_folder and has_init_py
+    return is_folder and has_init_py and is_executable if executable else is_folder and has_init_py
         

@@ -40,28 +40,22 @@ class InvalidModifierError(SettingsException):
     """
 
     def __init__(self, modifier = None):
-        msg = "'%s' is not a valid option modifier." % modifier \
-              if not modifier is None \
-              else "Modifiers are not allowed"
+        msg = "'%s' is not a valid option modifier." % modifier if not modifier is None else "Modifiers are not allowed"
         super(InvalidModifierError, self).__init__(msg)
 
 class InvalidOptionName(SettingsException):
     def __init__(self, option, section, type):
-        msg = "Option '%s' in section '%s' must be string type, not %s" % \
-            (option, section, str(type))
+        msg = "Option '%s' in section '%s' must be string type, not %s" % (option, section, str(type))
         super(InvalidOptionName, self).__init__(msg)
 
 class InvalidOptionValue(SettingsException):
     def __init__(self, option, section, type):
-        msg = "Option '%s' in section '%s' must be either string type "\
-        "(or a type convertible to string via a registered adapter), not %s" % \
-            (option, section, type)
+        msg = "Option '%s' in section '%s' must be either string type (or a type convertible to string via a registered adapter), not %s" % (option, section, type)
         super(InvalidOptionValue, self).__init__(msg)
 
 class ExternalSectionConflict(SettingsException):
     def __init__(self, section):
-        msg = "External section '%s' already defined in configuration file." \
-            % section
+        msg = "External section '%s' already defined in configuration file." % section
         super(ExternalSectionConflict, self).__init__(msg)
 
 class ParsingError(SettingsException):
@@ -88,7 +82,7 @@ class Settings(object):
 
     # List of adapters that will be used to try to write objects
     # of non-string type as option values
-    _registered_option_value_adapters = [ ]
+    _registered_option_value_adapters = []
 
     class Iterator(object):
         """
@@ -104,7 +98,7 @@ class Settings(object):
                 raise StopIteration
 
             else:
-                item = self.items[ self.current ]
+                item = self.items[self.current]
                 self.current += 1
                 return self._convert(item)
 
@@ -116,7 +110,6 @@ class Settings(object):
 
     def _finalize_init(self, config_items ):
         # Update the configuration from the startup config
-        import re
         for config_item in config_items:
             m = re.match(r'^(\w+):(\w+)=(.+)$', config_item)
             if m:
@@ -168,15 +161,10 @@ class Settings(object):
                 raise InvalidOptionName(option, self.section, type(option))
 
             # Check the value type
-            converted_value = \
-                value \
-                    if type(value) in (str, unicode) \
-                    else \
-                self.settings._adapt_value(value)
+            converted_value = value if type(value) in (str, unicode) else self.settings._adapt_value(value)
             if None == converted_value:
                 raise InvalidOptionValue(option, self.section, type(value))
-            assert type(converted_value) in (str, unicode), \
-                "Adapter did not return a string type"
+            assert type(converted_value) in (str, unicode), "Adapter did not return a string type"
 
             # Set the option
             self._set(option, converted_value)
@@ -225,12 +213,9 @@ class Settings(object):
                 raise InvalidModifierError()
             
             # Make sure the option is in the dictionary
-            if not option in self.settings._impl_external[ self.section ]:
-                raise NoOptionError(
-                    option  = option, 
-                    section = self.section
-                   )
-            return self.settings._impl_external[ self.section ][ option ]
+            if not option in self.settings._impl_external[self.section]:
+                raise NoOptionError(option  = option, section = self.section)
+            return self.settings._impl_external[self.section][option]
 
         def _set(self, option, value):
             """
@@ -245,10 +230,10 @@ class Settings(object):
                 for which the proxy fronts.
             """
             # Set the option
-            self.settings._impl_external[ self.section ][ option ] = value
+            self.settings._impl_external[self.section][option] = value
 
         def __iter__(self):
-            options = self.settings._impl_external[ self.section ].keys()
+            options = self.settings._impl_external[self.section].keys()
             return Settings.OptionIterator(options)
 
     class OptionProxy(OptionProxyBase ):
@@ -257,7 +242,7 @@ class Settings(object):
         modifiers.
         """
 
-        _allowed_modifiers = [ 'default', 'convert' ]
+        _allowed_modifiers = ['default', 'convert']
 
         def _get(self, option):
             """
@@ -275,9 +260,8 @@ class Settings(object):
                     raise InvalidModifierError(modifier)
 
             # Apply modifier 'default'
-            if 'default' in self.modifiers \
-                and not self.settings._impl.has_option(self.section, option):
-                default_value = self.modifiers[ 'default' ]
+            if 'default' in self.modifiers and not self.settings._impl.has_option(self.section, option):
+                default_value = self.modifiers['default']
                 self._set_option(option, default_value)
 
             # Get the option
@@ -285,7 +269,7 @@ class Settings(object):
 
             # Apply modifier 'type'
             if 'convert' in self.modifiers:
-                value = self.modifiers[ 'convert' ](value)
+                value = self.modifiers['convert'](value)
 
             # Return the value
             return value
@@ -328,8 +312,7 @@ class Settings(object):
         def __getattr__(self, section):
             return self.settings._get_section(section, **self.modifiers)
 
-    def __init__(self, config_file = None, defaults = None, \
-            ext_config = None, strict = False):
+    def __init__(self, config_file = None, defaults = None, ext_config = None, strict = False):
         """
         Constructs the Settings object from an external configuration
         dictionary-like object and a configuration file.
@@ -351,14 +334,13 @@ class Settings(object):
         """
         # Set the default parameters
         config_file = config_file if None != config_file else []
-        defaults     = defaults if None != defaults else {}
-        ext_config   = ext_config if None != ext_config else {}
+        defaults = defaults if None != defaults else {}
+        ext_config = ext_config if None != ext_config else {}
 
         # Sanity checks
         assert dict == type(defaults), "Expected dict type for defaults"
-        if type(config_file) in (str, unicode): config_file = [ config_file ]
-        assert list == type(config_file), \
-            "Expected a configuration file or a list of configuration files"
+        if type(config_file) in (str, unicode): config_file = [config_file]
+        assert list == type(config_file), "Expected a configuration file or a list of configuration files"
         for item in config_file:
             assert type(item) in (str, unicode), "Expected string type"
         assert dict == type(ext_config), "Expected dict type"
@@ -460,7 +442,7 @@ class Settings(object):
         :returns:
             An iterator that will go over the sections.
         """
-        proxies = [ self._get_section(section) for section in self.sections() ]
+        proxies = [self._get_section(section) for section in self.sections()]
         return Settings.SectionIterator(proxies)
 
     def _adapt_value(self, value):
@@ -544,4 +526,4 @@ def read_from_list(settings, options_list):
         section = matches.group('section')
         option  = matches.group('option')
         value   = matches.group('value')
-        settings[ section ][ option ] = value
+        settings[section][option] = value
