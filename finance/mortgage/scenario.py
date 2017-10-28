@@ -26,7 +26,7 @@
 # POSSIBILITY OF SUCH DAMAGE.
 ################################################################################
 from base.finance.mortgage.loan import Installment, Loan
-from base.utilities.texttable import Texttable
+from base.utilities.texttable import Texttable, bcolors, get_color_string
 import matplotlib.pyplot as plt
 import numpy as np
 
@@ -38,7 +38,7 @@ class Scenario(object):
         self.current_month = 1
         self._installments = [self.loan.monthly_installments[0]]
         self._reset_idx()
-        # self._marked_months = []
+        self._marked_months = []
 
     @property
     def current_total_interest(self):
@@ -79,7 +79,7 @@ class Scenario(object):
     def adjust_loan(self, annual_interest_rate, term_in_months):
         self.loan = Loan(self.current_debt, annual_interest_rate, term_in_months)
         self._reset_idx()
-        # self._mark_moth()
+        self._mark_month()
 
     def payoff(self, amount):
         self._installments[-1] = self._installments[-1]._replace(debt = self.current_debt - amount)
@@ -87,28 +87,32 @@ class Scenario(object):
         self._installments[-1] = self._installments[-1]._replace(total_paid = self.current_total_paid + amount)
         self.loan = Loan(self.current_debt, self.loan.annual_interest_rate, self.loan.nr_months - self._idx)
         self._reset_idx()
-        # self._mark_month()
+        self._mark_month()
 
     def finish(self):
         self.run(self.loan.nr_months - self._idx + 1)
 
     def summary(self):
+        def format(type, row):
+            return [get_color_string(type, cell) for cell in row]
         table = Texttable(max_width = 240)
-        header = ['Month', 'Interest', 'Capital', 'Payment', 'Tot. Interest', 'Tot. Capital', 'Tot. Paid', 'Debt']
+        header = format(bcolors.BOLD, ['Month', 'Interest', 'Capital', 'Payment', 'Tot. Interest', 'Tot. Capital', 'Tot. Paid', 'Debt'])
         data = [
                     [dp.idx, dp.interest, dp.capital, dp.payment, dp.total_interest, dp.total_capital, dp.total_paid, dp.debt]
                     for dp in self.installments
                 ]
+        for idx in self._marked_months:
+            data[idx] = format(bcolors.BLUE, int(data[idx)])
         rows = [header]
         rows.extend(data)
         table.set_cols_dtype(['i'] * len(rows[0]))
         table.add_rows(rows)
-        return self.description + "\n" + table.draw()
+        return get_color_string(bcolors.BOLD, self.description) + "\n" + table.draw()
 
     def plot(self):
         fig = plt.figure(facecolor = 'white')
         fig.canvas.set_window_title(self.description)
-        ax = plt.subplot(131)
+        ax = plt.subplot(221)
         width = 0.75
         _interest = [x for n, x in enumerate(self._data('interest')) if n % 12 == 0]
         _capital = [x for n, x in enumerate(self._data('capital')) if n % 12 == 0]
@@ -116,28 +120,40 @@ class Scenario(object):
         p1 = ax.bar(ind, _interest, width, color=(0.2588,0.4433,1.0), label = "Interest")
         p2 = ax.bar(ind, _capital, width, color=(1.0,0.5,0.62), bottom = _interest, label = "Capital")
         ax.legend()
+        ax.grid(True)
         ax.set_ylabel('EUR')
         ax.set_xlabel('Year')
 
-        ax = plt.subplot(132)
+        ax = plt.subplot(222)
         ax.plot(self._data('total_interest'), label = 'Total Interest')
         ax.plot(self._data('total_capital'), label = 'Total Capital')
         ax.legend()
+        ax.grid(True)
         ax.set_ylabel('EUR')
         ax.set_xlabel('Month')
 
-        ax = plt.subplot(133)
+        ax = plt.subplot(223)
         ax.plot(self._data('total_paid'), label = 'Cost')
         ax.plot(self._data('debt'), label = 'Debt')
         ax.legend()
+        ax.grid(True)
+        ax.set_ylabel('EUR')
+        ax.set_xlabel('Month')
+
+        ax = plt.subplot(224)
+        labels = ['Non-deductable Interest', 'Principal', 'Deductable Interest']
+        ax.plot(self._data('total_paid'), label = 'Cost')
+        ax.plot(self._data('debt'), label = 'Debt')
+        ax.legend()
+        ax.grid(True)
         ax.set_ylabel('EUR')
         ax.set_xlabel('Month')
 
     def _reset_idx(self):
         self._idx = 1
 
-    # def _mark_month(self):
-        # self._marked_months.append(self.current_month)
+    def _mark_month(self):
+        self._marked_months.append(self.current_month)
 
     def _data(self, name):
         return [getattr(installment, name) for installment in self.installments]
