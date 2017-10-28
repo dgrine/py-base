@@ -102,7 +102,7 @@ class Scenario(object):
                     for dp in self.installments
                 ]
         for idx in self._marked_months:
-            data[idx] = format(bcolors.BLUE, int(data[idx)])
+            data[idx] = format(bcolors.BLUE, data[idx])
         rows = [header]
         rows.extend(data)
         table.set_cols_dtype(['i'] * len(rows[0]))
