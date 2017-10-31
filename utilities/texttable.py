@@ -153,7 +153,7 @@ class Texttable:
     HLINES = 1 << 2
     VLINES = 1 << 3
 
-    def __init__(self, max_width=80):
+    def __init__(self, max_width=120):
         """Constructor
 
         - max_width is an integer, specifying the maximum width of the table
