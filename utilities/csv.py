@@ -26,9 +26,11 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE 
 # POSSIBILITY OF SUCH DAMAGE.
 ################################################################################
-import unicodecsv
-import codecs
+from base.utilities.conversion import guess_convert
 import cStringIO
+import codecs
+import collections
+import unicodecsv
 
 class UTF8Recoder(object):
     """
@@ -82,3 +84,40 @@ class UnicodeCSVWriter(object):
 
     def write_rows(self, rows):
         for row in rows: self.write_row(row)
+
+def read_csv(filename, guess_data_types = True, transform_function = None):
+    """
+    Returns a list where each element type depends on the given transformation funtion.
+    - transform_function is not None:
+        The given transformation function must accept a named tuple having 
+        the attributes of the CSV file's header and return an object. 
+        The type of the named tuple's attributes is either a string,
+        or in case the guess_data_types is set to True, a best-guess 
+        of the represented data type.
+    - transform_function is None:
+        Each element is a named tuple 'Record' with attributes of the
+        CSV file's header. The type of the named tuple's attributes is
+        either a string, or in case the guess_data_types is set to True,
+        a best-guess of the represented data type.
+    """
+    def convert(value):
+        if guess_data_types: return guess_convert(value)
+        return value
+    def transform(record):
+        if transform_function: return transform_function(record)
+        return record
+    records = []
+    with open(filename) as f:
+        Record = None
+        reader = UnicodeCSVReader(f)
+        header = None
+        for n, row in enumerate(reader):
+            if 0 == n:
+                header = row
+                Record = collections.namedtuple('Record', ' '.join(header))
+            else:
+                attributes = {header[n]: convert(value) for n, value in enumerate(row)}
+                record = transform(Record(**attributes))
+                records.append(record)
+    return records
+
