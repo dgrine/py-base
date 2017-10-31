@@ -33,6 +33,7 @@ import numpy as np
 class Scenario(object):
     def __init__(self, initial_loan, description):
         super(Scenario, self).__init__()
+        self.principal = initial_loan.principal
         self.loan = initial_loan
         self.description = description
         self.current_month = 1
@@ -107,47 +108,61 @@ class Scenario(object):
         rows.extend(data)
         table.set_cols_dtype(['i'] * len(rows[0]))
         table.add_rows(rows)
-        return get_color_string(bcolors.BOLD, self.description) + "\n" + table.draw()
+        report = get_color_string(bcolors.BOLD, self.description)
+        report += "\n" + table.draw()
+        report += "\nTotal interest: {} EUR".format(int(self.current_total_interest))
+        report += "\nTotal cost:     {} EUR".format(int(self.current_total_paid))
+        return report
 
     def plot(self):
         fig = plt.figure(facecolor = 'white')
         fig.canvas.set_window_title(self.description)
+        self._plot_interest_vs_capital()
+        self._plot_total_interest_vs_total_capital()
+        self._plot_debt_vs_total_paid()
+        self._plot_interest_vs_capital_shares()
+
+    def _plot_interest_vs_capital(self):
         ax = plt.subplot(221)
         width = 0.75
-        _interest = [x for n, x in enumerate(self._data('interest')) if n % 12 == 0]
-        _capital = [x for n, x in enumerate(self._data('capital')) if n % 12 == 0]
-        ind = np.arange(len(_interest))
-        p1 = ax.bar(ind, _interest, width, color=(0.2588,0.4433,1.0), label = "Interest")
-        p2 = ax.bar(ind, _capital, width, color=(1.0,0.5,0.62), bottom = _interest, label = "Capital")
+        data_interest = [x for n, x in enumerate(self._data('interest')) if n % 12 == 0]
+        ind = np.arange(len(data_interest))
+        p1 = ax.bar(ind, data_interest, width, color = self._color_bad, label = "Interest")
+        data_capital = [x for n, x in enumerate(self._data('capital')) if n % 12 == 0]
+        p2 = ax.bar(ind, data_capital, width, color = self._color_good, bottom = data_interest, label = "Capital")
         ax.legend()
-        # ax.grid(True)
         ax.set_ylabel('EUR')
         ax.set_xlabel('Year')
 
+    def _plot_total_interest_vs_total_capital(self):
         ax = plt.subplot(222)
-        ax.plot(self._data('total_interest'), label = 'Total Interest')
-        ax.plot(self._data('total_capital'), label = 'Total Capital')
+        data = self._data('total_interest')
+        ax.plot(data, label = 'Total Interest', color = self._color_bad)
+        ax.annotate("{} EUR".format(int(data[-1])), [0.75*len(data), 1.25*data[-1]])
+        data = self._data('total_capital')
+        ax.plot(data, label = 'Total Capital', color = self._color_good)
         ax.legend()
         ax.grid(True)
         ax.set_ylabel('EUR')
         ax.set_xlabel('Month')
 
+    def _plot_debt_vs_total_paid(self):
         ax = plt.subplot(223)
-        ax.plot(self._data('total_paid'), label = 'Cost')
-        ax.plot(self._data('debt'), label = 'Debt')
+        data = self._data('debt')
+        ax.plot(data, label = 'Debt', color = self._color_bad)
+        data = self._data('total_paid')
+        ax.plot(data, label = 'Cost', color = self._color_good)
         ax.legend()
         ax.grid(True)
         ax.set_ylabel('EUR')
         ax.set_xlabel('Month')
 
+    def _plot_interest_vs_capital_shares(self):
         ax = plt.subplot(224)
-        labels = ['Non-deductable Interest', 'Principal', 'Deductable Interest']
-        ax.plot(self._data('total_paid'), label = 'Cost')
-        ax.plot(self._data('debt'), label = 'Debt')
-        ax.legend()
-        ax.grid(True)
-        ax.set_ylabel('EUR')
-        ax.set_xlabel('Month')
+        labels = ['Interest', 'Capital']
+        shares = np.array([self.current_total_interest, self.current_total_capital]) / self.principal
+        ax.pie(shares, labels = labels, autopct = '%1.1f%%', shadow = False, colors = (self._color_bad, self._color_good))
+        ax.axis('equal') 
 
     def _reset_idx(self):
         self._idx = 1
@@ -157,4 +172,10 @@ class Scenario(object):
 
     def _data(self, name):
         return [getattr(installment, name) for installment in self.installments]
+    
+    @property
+    def _color_good(self): return (0.2588, 0.4433, 1.0)
+
+    @property
+    def _color_bad(self): return (1.0, 0.5, 0.62)
 
