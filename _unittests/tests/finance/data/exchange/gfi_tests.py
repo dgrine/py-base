@@ -27,11 +27,8 @@
 ################################################################################
 from base.finance.data.exchange.gfi import GFI
 from testing import TestCase, LogCapture
-from datetime import datetime
 
 class Test_GFI(TestCase):
     def test_basic(self):
         gfi = GFI()
         self.assertEqual(37, len(gfi.denominations))
-        for denomination in gfi.denominations:
-            print gfi.price(denomination)

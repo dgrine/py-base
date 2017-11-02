@@ -126,10 +126,10 @@ class Scenario(object):
         ax = plt.subplot(221)
         width = 0.75
         data_interest = [x for n, x in enumerate(self._data('interest')) if n % 12 == 0]
-        ind = np.arange(len(data_interest))
-        p1 = ax.bar(ind, data_interest, width, color = self._color_bad, label = "Interest")
+        indices = np.arange(len(data_interest))
+        ax.bar(indices, data_interest, width, color = self._color_bad, label = "Interest")
         data_capital = [x for n, x in enumerate(self._data('capital')) if n % 12 == 0]
-        p2 = ax.bar(ind, data_capital, width, color = self._color_good, bottom = data_interest, label = "Capital")
+        ax.bar(indices, data_capital, width, color = self._color_good, bottom = data_interest, label = "Capital")
         ax.legend()
         ax.set_ylabel('EUR')
         ax.set_xlabel('Year')
