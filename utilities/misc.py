@@ -30,6 +30,7 @@ from collections import defaultdict
 import datetime
 import dateutil.parser
 import json
+import math
 import os
 import random
 import re
@@ -135,3 +136,10 @@ def round_number(number, nof_decimals = 2):
     assert int == type(nof_decimals), "Expected int type"
     return float(str(round(number, nof_decimals)))
 
+def nearest_elements(x, y, distance = lambda a, b: math.fabs(a-b)):
+    best_fits = []
+    for xn in x:
+        distances = [distance(xn, yk) for yk in y]
+        best_fit = y[distances.index(min(distances))]
+        best_fits.append(best_fit)
+    return best_fits
