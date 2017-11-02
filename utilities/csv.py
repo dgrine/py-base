@@ -85,39 +85,56 @@ class UnicodeCSVWriter(object):
     def write_rows(self, rows):
         for row in rows: self.write_row(row)
 
-def read_csv(filename, guess_data_types = True, transform_function = None):
+def read_csv(f, guess_data_types = True, header = None, line_skipper = None, transformer = None):
     """
-    Returns a list where each element type depends on the given transformation funtion.
-    - transform_function is not None:
-        The given transformation function must accept a named tuple having 
+    Returns a list where each element type depends on the given transformer.
+    - transformer is not None:
+        The given transformation functor must accept a named tuple having 
         the attributes of the CSV file's header and return an object. 
         The type of the named tuple's attributes is either a string,
         or in case the guess_data_types is set to True, a best-guess 
         of the represented data type.
-    - transform_function is None:
+    - transformer is None:
         Each element is a named tuple 'Record' with attributes of the
         CSV file's header. The type of the named tuple's attributes is
         either a string, or in case the guess_data_types is set to True,
         a best-guess of the represented data type.
+
+    Only lines for which line_skipper returns False are presented
+    to the transformer. The line_skipper functor must accept an integer and
+    list of strings corresponding to the line number and row respectively.
+
+    Unless a header is provided, the attributes of the named tuple are the 
+    columns of the first processed row.
     """
     def convert(value):
         if guess_data_types: return guess_convert(value)
         return value
     def transform(record):
-        if transform_function: return transform_function(record)
+        if transformer: return transformer(record)
         return record
-    records = []
-    with open(filename) as f:
-        Record = None
-        reader = UnicodeCSVReader(f)
-        header = None
-        for n, row in enumerate(reader):
-            if 0 == n:
-                header = row
-                Record = collections.namedtuple('Record', ' '.join(header))
-            else:
-                attributes = {header[n]: convert(value) for n, value in enumerate(row)}
-                record = transform(Record(**attributes))
-                records.append(record)
-    return records
+    items = []
+    Record = None
+    reader = UnicodeCSVReader(f)
+    for row_idx, row in enumerate(reader):
+        if line_skipper is not None and line_skipper(row_idx, row): continue
+        if Record is None:
+            if header is None: header = row
+            Record = collections.namedtuple('Record', ' '.join(header))
+        else:
+            if len(row) < len(header): row = row + [None] * (len(header)-len(row))
+            elif len(row) > len(header): row = row[0:len(header)]
+            attributes = {
+                header[n]: convert(value) 
+                for n, value in enumerate(row)
+            }
+            record = Record(**attributes)
+            item = transform(record)
+            items.append(item)
+    return items
 
+def write_csv(filename, rows, header = None):
+    with open(filename,'w') as f:
+        writer = UnicodeCSVWriter(f)
+        if header is None and len(rows) > 0: writer.write_row(rows[0]._fields)
+        writer.write_rows(rows)
