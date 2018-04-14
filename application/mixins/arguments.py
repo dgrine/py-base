@@ -43,7 +43,6 @@ class ArgumentsMixin(metaclass = _ArgumentsMixinMeta):
     """
     Application mixin that adds argument parsing.
     """
-    # __metaclass__ = _ArgumentsMixinMeta
 
     def __init__(self, *args, **kwargs):
         if not hasattr(self.__class__, '_argv'):
