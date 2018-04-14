@@ -25,12 +25,9 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE 
 # POSSIBILITY OF SUCH DAMAGE.
 ################################################################################
-import ConfigParser
+from configparser import ConfigParser, NoOptionError, NoSectionError
 import re
 import os
-
-NoOptionError  = ConfigParser.NoOptionError
-NoSectionError = ConfigParser.NoSectionError
 
 class SettingsException(Exception): pass
 
@@ -151,20 +148,20 @@ class Settings(object):
             self._set_option(option, value)
 
         def _get_option(self, option):
-            if not type(option) in (str, unicode):
+            if not type(option) is str:
                 raise InvalidOptionName(option, self.section, type(option))
             return self._get(option)
 
         def _set_option(self, option, value):
             # Check the option type
-            if not type(option) in (str, unicode):
+            if not type(option) is str:
                 raise InvalidOptionName(option, self.section, type(option))
 
             # Check the value type
-            converted_value = value if type(value) in (str, unicode) else self.settings._adapt_value(value)
+            converted_value = value if type(value) is str else self.settings._adapt_value(value)
             if None == converted_value:
                 raise InvalidOptionValue(option, self.section, type(value))
-            assert type(converted_value) in (str, unicode), "Adapter did not return a string type"
+            assert type(converted_value) is str, "Adapter did not return a string type"
 
             # Set the option
             self._set(option, converted_value)
@@ -287,7 +284,7 @@ class Settings(object):
                 for which the proxy fronts.
             """
             # We always store strings
-            if not type(value) in (str, unicode): value = str(value)
+            if not type(value) is str: value = str(value)
 
             # Set the option
             self.settings._impl.set(self.section, option, value)
@@ -339,15 +336,15 @@ class Settings(object):
 
         # Sanity checks
         assert dict == type(defaults), "Expected dict type for defaults"
-        if type(config_file) in (str, unicode): config_file = [config_file]
+        if type(config_file) is str: config_file = [config_file]
         assert list == type(config_file), "Expected a configuration file or a list of configuration files"
         for item in config_file:
-            assert type(item) in (str, unicode), "Expected string type"
+            assert type(item) is str, "Expected string type"
         assert dict == type(ext_config), "Expected dict type"
         assert bool == type(strict), "Expected bool type"
 
         # Set the underlying implementations
-        self._impl = ConfigParser.ConfigParser(defaults = defaults)
+        self._impl = ConfigParser(defaults = defaults)
         self._impl_external = ext_config
         
         # Read the configuration files
@@ -452,7 +449,7 @@ class Settings(object):
         """
         for adapter in Settings._registered_option_value_adapters:
             adapted_value = adapter(value)
-            if type(adapted_value) in (str, unicode):
+            if type(adapted_value) is str:
                 return adapted_value
 
     @classmethod
@@ -519,7 +516,7 @@ def read_from_list(settings, options_list):
     assert list == type(options_list), "Expected list type"
     assert Settings == type(settings), "Expected Settings type"
     for item in options_list:
-        assert type(item) in (str, unicode), "Expected string type"
+        assert type(item) is str, "Expected string type"
         matches = _read_from_list_regex.match(item)
         if None == matches:
             raise ParsingError(item)

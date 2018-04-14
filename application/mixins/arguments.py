@@ -39,11 +39,11 @@ class _ArgumentsMixinMeta(type):
         else:
             return super(_ArgumentsMixinMeta, cls).__call__(*args, **kwargs)
 
-class ArgumentsMixin(object):
+class ArgumentsMixin(metaclass = _ArgumentsMixinMeta):
     """
     Application mixin that adds argument parsing.
     """
-    __metaclass__ = _ArgumentsMixinMeta
+    # __metaclass__ = _ArgumentsMixinMeta
 
     def __init__(self, *args, **kwargs):
         if not hasattr(self.__class__, '_argv'):
